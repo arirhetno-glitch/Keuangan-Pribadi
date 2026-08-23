@@ -1,1 +1,890 @@
-index.html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Keuangan Pribadi</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Arial,Helvetica,sans-serif;
+  background:#f4f6f8;
+  color:#1f2937;
+}
+body.dark{
+  background:#111827;
+  color:#f3f4f6;
+}
+header{
+  background:#166534;
+  color:white;
+  padding:20px 16px;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+.header-title{
+  font-size:24px;
+  font-weight:bold;
+}
+.header-subtitle{
+  margin-top:5px;
+  opacity:.9;
+  font-size:14px;
+}
+.container{
+  max-width:1100px;
+  margin:auto;
+  padding:16px;
+}
+nav{
+  display:flex;
+  gap:8px;
+  overflow-x:auto;
+  padding:10px 0;
+  position:sticky;
+  top:86px;
+  background:#f4f6f8;
+  z-index:9;
+}
+body.dark nav{background:#111827}
+nav button{
+  border:0;
+  padding:10px 14px;
+  border-radius:10px;
+  background:white;
+  color:#374151;
+  white-space:nowrap;
+  cursor:pointer;
+}
+body.dark nav button{
+  background:#1f2937;
+  color:#fff;
+}
+nav button.active{
+  background:#166534;
+  color:white;
+}
+.page{display:none}
+.page.active{display:block}
+.grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+}
+.card{
+  background:white;
+  border-radius:16px;
+  padding:18px;
+  box-shadow:0 2px 10px rgba(0,0,0,.06);
+  margin-bottom:14px;
+}
+body.dark .card{
+  background:#1f2937;
+  box-shadow:none;
+}
+.card h3{
+  margin:0 0 8px;
+}
+.amount{
+  font-size:24px;
+  font-weight:bold;
+}
+.green{color:#15803d}
+.red{color:#dc2626}
+.orange{color:#ea580c}
+.blue{color:#2563eb}
+.progress{
+  height:10px;
+  background:#e5e7eb;
+  border-radius:20px;
+  overflow:hidden;
+  margin:10px 0;
+}
+.progress div{
+  height:100%;
+  background:#16a34a;
+}
+body.dark .progress{background:#374151}
+button.primary{
+  background:#166534;
+  color:white;
+  border:0;
+  border-radius:10px;
+  padding:11px 16px;
+  cursor:pointer;
+}
+button.secondary{
+  background:#e5e7eb;
+  color:#111827;
+  border:0;
+  border-radius:10px;
+  padding:10px 14px;
+  cursor:pointer;
+}
+button.danger{
+  background:#dc2626;
+  color:white;
+  border:0;
+  border-radius:8px;
+  padding:7px 10px;
+  cursor:pointer;
+}
+input,select{
+  width:100%;
+  padding:11px;
+  border:1px solid #d1d5db;
+  border-radius:9px;
+  margin-top:5px;
+  margin-bottom:12px;
+  background:white;
+  color:#111827;
+}
+body.dark input,body.dark select{
+  background:#111827;
+  color:white;
+  border-color:#4b5563;
+}
+label{
+  font-size:13px;
+  font-weight:bold;
+}
+.form-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th,td{
+  text-align:left;
+  padding:10px 6px;
+  border-bottom:1px solid #e5e7eb;
+  font-size:14px;
+}
+body.dark th,body.dark td{
+  border-color:#374151;
+}
+.goal{
+  margin-bottom:18px;
+}
+.goal-header{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+}
+.small{
+  font-size:13px;
+  color:#6b7280;
+}
+body.dark .small{color:#9ca3af}
+.alert{
+  padding:12px;
+  border-radius:10px;
+  margin-bottom:12px;
+  background:#fef3c7;
+  color:#92400e;
+}
+.empty{
+  text-align:center;
+  padding:25px;
+  color:#6b7280;
+}
+.actions{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+@media(max-width:800px){
+  .grid{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:550px){
+  .grid{grid-template-columns:1fr 1fr}
+  .form-grid{grid-template-columns:1fr}
+  .amount{font-size:20px}
+  .container{padding:10px}
+  .card{padding:14px}
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="header-title">💰 Keuangan Pribadi</div>
+  <div class="header-subtitle">
+    Kelola pemasukan, kebutuhan, tabungan dan target Anda
+  </div>
+</header>
+
+<div class="container">
+
+<nav>
+  <button class="active" onclick="showPage('dashboard',this)">🏠 Dashboard</button>
+  <button onclick="showPage('income',this)">💰 Pemasukan</button>
+  <button onclick="showPage('expense',this)">💸 Pengeluaran</button>
+  <button onclick="showPage('goals',this)">🎯 Target</button>
+  <button onclick="showPage('settings',this)">⚙️ Pengaturan</button>
+</nav>
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="page active">
+
+<div id="alertBox"></div>
+
+<div class="grid">
+  <div class="card">
+    <div class="small">Total Pemasukan</div>
+    <div class="amount green" id="totalIncome">Rp0</div>
+  </div>
+
+  <div class="card">
+    <div class="small">Total Pengeluaran</div>
+    <div class="amount red" id="totalExpense">Rp0</div>
+  </div>
+
+  <div class="card">
+    <div class="small">Total Tabungan</div>
+    <div class="amount blue" id="totalSaving">Rp0</div>
+  </div>
+
+  <div class="card">
+    <div class="small">Saldo</div>
+    <div class="amount orange" id="balance">Rp0</div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>📊 Ringkasan Keuangan</h3>
+  <p>Total pemasukan: <b id="sumIncome">Rp0</b></p>
+  <p>Total pengeluaran: <b id="sumExpense">Rp0</b></p>
+  <p>Total dana yang dialokasikan: <b id="sumSaving">Rp0</b></p>
+  <p>Sisa uang: <b id="sumBalance">Rp0</b></p>
+</div>
+
+<div class="card">
+  <h3>🎯 Progress Target</h3>
+  <div id="dashboardGoals"></div>
+</div>
+
+</section>
+
+<!-- PEMASUKAN -->
+<section id="income" class="page">
+
+<div class="card">
+<h3>💰 Tambah Pemasukan</h3>
+
+<div class="form-grid">
+<div>
+<label>Tanggal</label>
+<input type="date" id="incomeDate">
+</div>
+
+<div>
+<label>Nominal</label>
+<input type="number" id="incomeAmount" placeholder="Contoh: 800000">
+</div>
+
+<div>
+<label>Sumber Pemasukan</label>
+<input type="text" id="incomeSource" placeholder="Contoh: Kerja">
+</div>
+
+<div>
+<label>Minggu ke-</label>
+<input type="number" id="incomeWeek" placeholder="Contoh: 1">
+</div>
+</div>
+
+<label>Catatan</label>
+<input type="text" id="incomeNote" placeholder="Catatan">
+
+<button class="primary" onclick="addIncome()">+ Simpan Pemasukan</button>
+</div>
+
+<div class="card">
+<h3>📋 Riwayat Pemasukan</h3>
+<div id="incomeList"></div>
+</div>
+
+</section>
+
+<!-- PENGELUARAN -->
+<section id="expense" class="page">
+
+<div class="card">
+<h3>💸 Tambah Pengeluaran</h3>
+
+<div class="form-grid">
+<div>
+<label>Tanggal</label>
+<input type="date" id="expenseDate">
+</div>
+
+<div>
+<label>Nominal</label>
+<input type="number" id="expenseAmount" placeholder="Contoh: 50000">
+</div>
+
+<div>
+<label>Kategori</label>
+<select id="expenseCategory"></select>
+</div>
+
+<div>
+<label>Deskripsi</label>
+<input type="text" id="expenseDescription" placeholder="Contoh: Beli susu">
+</div>
+</div>
+
+<button class="primary" onclick="addExpense()">+ Simpan Pengeluaran</button>
+</div>
+
+<div class="card">
+<h3>📋 Riwayat Pengeluaran</h3>
+<div id="expenseList"></div>
+</div>
+
+</section>
+
+<!-- TARGET -->
+<section id="goals" class="page">
+
+<div class="card">
+<h3>🎯 Tambah Target</h3>
+
+<div class="form-grid">
+<div>
+<label>Nama Target</label>
+<input type="text" id="goalName" placeholder="Contoh: Motor">
+</div>
+
+<div>
+<label>Target Nominal</label>
+<input type="number" id="goalTarget" placeholder="Contoh: 15000000">
+</div>
+
+<div>
+<label>Dana Terkumpul</label>
+<input type="number" id="goalSaved" placeholder="0">
+</div>
+
+<div>
+<label>Alokasi Mingguan</label>
+<input type="number" id="goalWeekly" placeholder="Contoh: 100000">
+</div>
+</div>
+
+<button class="primary" onclick="addGoal()">+ Tambah Target</button>
+</div>
+
+<div class="card">
+<h3>🎯 Semua Target</h3>
+<div id="goalList"></div>
+</div>
+
+</section>
+
+<!-- PENGATURAN -->
+<section id="settings" class="page">
+
+<div class="card">
+<h3>⚙️ Pengaturan</h3>
+
+<label>Nama Aplikasi</label>
+<input id="appName" value="Keuangan Pribadi">
+
+<button class="secondary" onclick="toggleDark()">🌙 Mode Gelap / Terang</button>
+
+<hr style="margin:20px 0">
+
+<h3>📂 Kategori</h3>
+
+<div id="categoryList"></div>
+
+<br>
+
+<input id="newCategory" placeholder="Nama kategori baru">
+<button class="primary" onclick="addCategory()">+ Tambah Kategori</button>
+
+<hr style="margin:20px 0">
+
+<button class="danger" onclick="resetData()">
+🗑️ Hapus Semua Data
+</button>
+
+</div>
+
+</section>
+
+</div>
+
+<script>
+
+const defaultCategories = [
+  "Anak",
+  "Persiapan Nikah",
+  "Calon Istri",
+  "Modal Usaha",
+  "Motor",
+  "Dana Darurat",
+  "Makanan",
+  "Transportasi",
+  "Tagihan",
+  "Rumah",
+  "Pendidikan",
+  "Kesehatan",
+  "Hiburan",
+  "Lainnya"
+];
+
+const defaultGoals = [
+  {
+    id:1,
+    name:"👶 Anak",
+    target:10400000,
+    saved:0,
+    weekly:200000
+  },
+  {
+    id:2,
+    name:"💍 Persiapan Nikah",
+    target:0,
+    saved:0,
+    weekly:200000
+  },
+  {
+    id:3,
+    name:"❤️ Calon Istri",
+    target:0,
+    saved:0,
+    weekly:80000
+  },
+  {
+    id:4,
+    name:"💼 Modal Usaha",
+    target:0,
+    saved:0,
+    weekly:100000
+  },
+  {
+    id:5,
+    name:"🏍️ Motor",
+    target:15000000,
+    saved:0,
+    weekly:100000
+  },
+  {
+    id:6,
+    name:"🛡️ Dana Darurat",
+    target:5000000,
+    saved:0,
+    weekly:80000
+  }
+];
+
+let data = JSON.parse(localStorage.getItem("keuanganPribadi")) || {
+  incomes:[],
+  expenses:[],
+  goals:defaultGoals,
+  categories:defaultCategories
+};
+
+function save(){
+  localStorage.setItem("keuanganPribadi",JSON.stringify(data));
+  render();
+}
+
+function rupiah(n){
+  return new Intl.NumberFormat("id-ID",{
+    style:"currency",
+    currency:"IDR",
+    maximumFractionDigits:0
+  }).format(Number(n)||0);
+}
+
+function showPage(id,btn){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+
+  document.querySelectorAll("nav button").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+}
+
+function addIncome(){
+
+  const amount=Number(document.getElementById("incomeAmount").value);
+
+  if(!amount || amount<=0){
+    alert("Masukkan nominal pemasukan.");
+    return;
+  }
+
+  data.incomes.push({
+    id:Date.now(),
+    date:document.getElementById("incomeDate").value || new Date().toISOString().slice(0,10),
+    amount,
+    source:document.getElementById("incomeSource").value || "Pemasukan",
+    week:document.getElementById("incomeWeek").value,
+    note:document.getElementById("incomeNote").value
+  });
+
+  document.getElementById("incomeAmount").value="";
+  document.getElementById("incomeSource").value="";
+  document.getElementById("incomeWeek").value="";
+  document.getElementById("incomeNote").value="";
+
+  save();
+}
+
+function deleteIncome(id){
+  if(confirm("Hapus pemasukan ini?")){
+    data.incomes=data.incomes.filter(x=>x.id!==id);
+    save();
+  }
+}
+
+function addExpense(){
+
+  const amount=Number(document.getElementById("expenseAmount").value);
+
+  if(!amount || amount<=0){
+    alert("Masukkan nominal pengeluaran.");
+    return;
+  }
+
+  data.expenses.push({
+    id:Date.now(),
+    date:document.getElementById("expenseDate").value || new Date().toISOString().slice(0,10),
+    amount,
+    category:document.getElementById("expenseCategory").value,
+    description:document.getElementById("expenseDescription").value
+  });
+
+  document.getElementById("expenseAmount").value="";
+  document.getElementById("expenseDescription").value="";
+
+  save();
+}
+
+function deleteExpense(id){
+  if(confirm("Hapus pengeluaran ini?")){
+    data.expenses=data.expenses.filter(x=>x.id!==id);
+    save();
+  }
+}
+
+function addGoal(){
+
+  const name=document.getElementById("goalName").value.trim();
+  const target=Number(document.getElementById("goalTarget").value);
+  const saved=Number(document.getElementById("goalSaved").value)||0;
+  const weekly=Number(document.getElementById("goalWeekly").value)||0;
+
+  if(!name){
+    alert("Masukkan nama target.");
+    return;
+  }
+
+  data.goals.push({
+    id:Date.now(),
+    name,
+    target,
+    saved,
+    weekly
+  });
+
+  document.getElementById("goalName").value="";
+  document.getElementById("goalTarget").value="";
+  document.getElementById("goalSaved").value="";
+  document.getElementById("goalWeekly").value="";
+
+  save();
+}
+
+function deleteGoal(id){
+  if(confirm("Hapus target ini?")){
+    data.goals=data.goals.filter(x=>x.id!==id);
+    save();
+  }
+}
+
+function editGoal(id){
+
+  const goal=data.goals.find(x=>x.id===id);
+
+  if(!goal)return;
+
+  const name=prompt("Nama target:",goal.name);
+  if(name===null)return;
+
+  const target=prompt("Target nominal:",goal.target);
+  if(target===null)return;
+
+  const saved=prompt("Dana terkumpul:",goal.saved);
+  if(saved===null)return;
+
+  const weekly=prompt("Alokasi per minggu:",goal.weekly);
+  if(weekly===null)return;
+
+  goal.name=name;
+  goal.target=Number(target)||0;
+  goal.saved=Number(saved)||0;
+  goal.weekly=Number(weekly)||0;
+
+  save();
+}
+
+function addCategory(){
+
+  const name=document.getElementById("newCategory").value.trim();
+
+  if(!name)return;
+
+  data.categories.push(name);
+
+  document.getElementById("newCategory").value="";
+
+  save();
+}
+
+function deleteCategory(index){
+
+  if(confirm("Hapus kategori ini?")){
+    data.categories.splice(index,1);
+    save();
+  }
+}
+
+function totalIncome(){
+  return data.incomes.reduce((sum,x)=>sum+Number(x.amount),0);
+}
+
+function totalExpense(){
+  return data.expenses.reduce((sum,x)=>sum+Number(x.amount),0);
+}
+
+function totalSaving(){
+  return data.goals.reduce((sum,x)=>sum+Number(x.weekly),0);
+}
+
+function render(){
+
+  const income=totalIncome();
+  const expense=totalExpense();
+  const balance=income-expense;
+
+  document.getElementById("totalIncome").textContent=rupiah(income);
+  document.getElementById("totalExpense").textContent=rupiah(expense);
+  document.getElementById("totalSaving").textContent=rupiah(totalSaving());
+  document.getElementById("balance").textContent=rupiah(balance);
+
+  document.getElementById("sumIncome").textContent=rupiah(income);
+  document.getElementById("sumExpense").textContent=rupiah(expense);
+  document.getElementById("sumSaving").textContent=rupiah(totalSaving());
+  document.getElementById("sumBalance").textContent=rupiah(balance);
+
+  renderIncome();
+  renderExpense();
+  renderGoals();
+  renderDashboardGoals();
+  renderCategories();
+
+  if(balance<0){
+    document.getElementById("alertBox").innerHTML=
+      `<div class="alert">⚠️ Pengeluaran lebih besar dari pemasukan sebesar ${rupiah(Math.abs(balance))}.</div>`;
+  }else{
+    document.getElementById("alertBox").innerHTML="";
+  }
+}
+
+function renderIncome(){
+
+  const el=document.getElementById("incomeList");
+
+  if(!data.incomes.length){
+    el.innerHTML='<div class="empty">Belum ada pemasukan.</div>';
+    return;
+  }
+
+  el.innerHTML=`
+  <table>
+  <tr>
+    <th>Tanggal</th>
+    <th>Sumber</th>
+    <th>Nominal</th>
+    <th></th>
+  </tr>
+  ${
+    data.incomes.slice().reverse().map(x=>`
+      <tr>
+        <td>${x.date}</td>
+        <td>${x.source}</td>
+        <td class="green"><b>${rupiah(x.amount)}</b></td>
+        <td>
+          <button class="danger" onclick="deleteIncome(${x.id})">Hapus</button>
+        </td>
+      </tr>
+    `).join("")
+  }
+  </table>`;
+}
+
+function renderExpense(){
+
+  const el=document.getElementById("expenseList");
+
+  if(!data.expenses.length){
+    el.innerHTML='<div class="empty">Belum ada pengeluaran.</div>';
+    return;
+  }
+
+  el.innerHTML=`
+  <table>
+  <tr>
+    <th>Tanggal</th>
+    <th>Kategori</th>
+    <th>Nominal</th>
+    <th></th>
+  </tr>
+  ${
+    data.expenses.slice().reverse().map(x=>`
+      <tr>
+        <td>${x.date}</td>
+        <td>${x.category}</td>
+        <td class="red"><b>${rupiah(x.amount)}</b></td>
+        <td>
+          <button class="danger" onclick="deleteExpense(${x.id})">Hapus</button>
+        </td>
+      </tr>
+    `).join("")
+  }
+  </table>`;
+}
+
+function renderGoals(){
+
+  const el=document.getElementById("goalList");
+
+  el.innerHTML=data.goals.map(goal=>{
+
+    const percent=goal.target>0
+      ? Math.min(100,(goal.saved/goal.target)*100)
+      : 0;
+
+    const remaining=Math.max(0,goal.target-goal.saved);
+
+    return `
+    <div class="goal">
+      <div class="goal-header">
+        <b>${goal.name}</b>
+        <b>${percent.toFixed(0)}%</b>
+      </div>
+
+      <div class="progress">
+        <div style="width:${percent}%"></div>
+      </div>
+
+      <div class="small">
+        Terkumpul: ${rupiah(goal.saved)}
+        ${goal.target ? " / "+rupiah(goal.target) : ""}
+      </div>
+
+      ${
+        goal.target
+        ? `<div class="small">Kekurangan: ${rupiah(remaining)}</div>`
+        : `<div class="small">Target belum ditentukan</div>`
+      }
+
+      <div class="small">
+        Alokasi mingguan: ${rupiah(goal.weekly)}
+      </div>
+
+      <div class="actions" style="margin-top:8px">
+        <button class="secondary" onclick="editGoal(${goal.id})">✏️ Edit</button>
+        <button class="danger" onclick="deleteGoal(${goal.id})">🗑️ Hapus</button>
+      </div>
+    </div>
+    `;
+  }).join("");
+}
+
+function renderDashboardGoals(){
+
+  document.getElementById("dashboardGoals").innerHTML=data.goals.map(goal=>{
+
+    const percent=goal.target>0
+      ? Math.min(100,(goal.saved/goal.target)*100)
+      : 0;
+
+    return `
+    <div class="goal">
+      <div class="goal-header">
+        <b>${goal.name}</b>
+        <span>${percent.toFixed(0)}%</span>
+      </div>
+      <div class="progress">
+        <div style="width:${percent}%"></div>
+      </div>
+      <div class="small">
+        ${rupiah(goal.saved)}
+        ${goal.target ? " / "+rupiah(goal.target) : ""}
+      </div>
+    </div>
+    `;
+  }).join("");
+}
+
+function renderCategories(){
+
+  const select=document.getElementById("expenseCategory");
+
+  select.innerHTML=data.categories.map(x=>
+    `<option value="${x}">${x}</option>`
+  ).join("");
+
+  const list=document.getElementById("categoryList");
+
+  list.innerHTML=data.categories.map((x,i)=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid #ddd">
+      <span>${x}</span>
+      <button class="danger" onclick="deleteCategory(${i})">Hapus</button>
+    </div>
+  `).join("");
+}
+
+function toggleDark(){
+
+  document.body.classList.toggle("dark");
+
+  localStorage.setItem(
+    "darkMode",
+    document.body.classList.contains("dark")
+  );
+}
+
+function resetData(){
+
+  if(confirm("PERINGATAN: Semua data akan dihapus. Lanjutkan?")){
+
+    localStorage.removeItem("keuanganPribadi");
+
+    location.reload();
+  }
+}
+
+if(localStorage.getItem("darkMode")==="true"){
+  document.body.classList.add("dark");
+}
+
+render();
+
+</script>
+
+</body>
+</html>
